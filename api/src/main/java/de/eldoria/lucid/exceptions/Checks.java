@@ -1,10 +1,11 @@
 package de.eldoria.lucid.exceptions;
 
+import de.eldoria.lucid.container.Formed;
+import de.eldoria.lucid.exceptions.ex.InvalidShapeException;
 import de.eldoria.lucid.exceptions.ex.InvalidSizeException;
-import de.eldoria.lucid.scene.Form;
 
 public final class Checks {
-    public static void assertSceneForm(Form form) {
+    public static void assertSceneForm(Formed form) {
         if (form.vertical() < 1) {
             throw new InvalidSizeException("Vertical size is less than 1. Has to be between 1 and 6.");
         }
@@ -13,6 +14,15 @@ public final class Checks {
         }
         if (form.horizontal() != 9) {
             throw new InvalidSizeException("Horizontal size has to be 9.");
+        }
+    }
+
+    public static void assertNotEvenForm(Formed form) {
+        if (form.horizontal() % 2 == 0) {
+            throw new InvalidShapeException("Shape has to be an uneven number on horizontal axis.");
+        }
+        if (form.vertical() % 2 == 0) {
+            throw new InvalidShapeException("Shape has to be an uneven number on vertical axis.");
         }
     }
 }

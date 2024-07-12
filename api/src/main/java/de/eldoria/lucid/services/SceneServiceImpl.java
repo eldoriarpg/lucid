@@ -66,6 +66,7 @@ public class SceneServiceImpl implements Listener, SceneService {
         Inventory inventory = plugin.getServer().createInventory(null, scene.size());
         scene.apply(inventory);
         open.put(player.getUniqueId(), new Session(inventory, scene));
+        player.openInventory(inventory);
     }
 
     private record Session(Inventory inventory, Scene scene) {

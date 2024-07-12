@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.pluginyml.bukkit)
     alias(libs.plugins.shadow)
+    alias(libs.plugins.runserver)
 }
 
 dependencies {
@@ -12,6 +13,10 @@ dependencies {
 tasks {
     shadowJar {
         mergeServiceFiles()
+    }
+    runServer{
+        minecraftVersion("1.21")
+        jvmArgs("-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005")
     }
 }
 
