@@ -1,4 +1,4 @@
-package de.eldoria.lucid.container;
+package de.eldoria.lucid.layer;
 
 /**
  * Describes the form of a rectangular shaped entry.

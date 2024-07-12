@@ -1,7 +1,7 @@
 package de.eldoria.lucid.scroller;
 
 
-import de.eldoria.lucid.container.Sized;
+import de.eldoria.lucid.layer.Sized;
 
 public interface ScrollJumper {
     /**

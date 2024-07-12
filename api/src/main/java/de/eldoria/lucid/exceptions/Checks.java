@@ -1,6 +1,6 @@
 package de.eldoria.lucid.exceptions;
 
-import de.eldoria.lucid.container.Formed;
+import de.eldoria.lucid.layer.Formed;
 import de.eldoria.lucid.exceptions.ex.InvalidShapeException;
 import de.eldoria.lucid.exceptions.ex.InvalidSizeException;
 

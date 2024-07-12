@@ -1,14 +1,13 @@
-package de.eldoria.lucid.container.anchor.impl;
+package de.eldoria.lucid.layer.anchor.impl;
 
-import de.eldoria.lucid.container.Area;
-import de.eldoria.lucid.container.Position;
+import de.eldoria.lucid.layer.Area;
+import de.eldoria.lucid.layer.Position;
 import de.eldoria.lucid.exceptions.ex.InvalidShapeException;
 import de.eldoria.lucid.scene.Form;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static de.eldoria.lucid.container.anchor.Anchor.BOTTOM_RIGHT;
-import static de.eldoria.lucid.container.anchor.Anchor.CENTER;
+import static de.eldoria.lucid.layer.anchor.Anchor.CENTER;
 
 class CenterAnchorTest {
 

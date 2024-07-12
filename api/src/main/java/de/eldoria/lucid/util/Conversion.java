@@ -1,8 +1,6 @@
 package de.eldoria.lucid.util;
 
-import de.eldoria.lucid.container.Container;
-import de.eldoria.lucid.container.Position;
-import net.kyori.adventure.text.BlockNBTComponent;
+import de.eldoria.lucid.layer.Position;
 
 public final class Conversion {
     public static Position chestSlotToPosition(int slot) {

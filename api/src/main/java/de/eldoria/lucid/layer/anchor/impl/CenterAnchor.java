@@ -1,9 +1,9 @@
-package de.eldoria.lucid.container.anchor.impl;
+package de.eldoria.lucid.layer.anchor.impl;
 
-import de.eldoria.lucid.container.Area;
-import de.eldoria.lucid.container.Formed;
-import de.eldoria.lucid.container.Position;
-import de.eldoria.lucid.container.anchor.Anchor;
+import de.eldoria.lucid.layer.Area;
+import de.eldoria.lucid.layer.Formed;
+import de.eldoria.lucid.layer.Position;
+import de.eldoria.lucid.layer.anchor.Anchor;
 import de.eldoria.lucid.exceptions.Checks;
 
 public class CenterAnchor implements Anchor {

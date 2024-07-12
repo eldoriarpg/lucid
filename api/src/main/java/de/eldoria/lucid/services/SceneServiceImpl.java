@@ -5,7 +5,11 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
@@ -33,14 +37,35 @@ public class SceneServiceImpl implements Listener, SceneService {
     public void onSceneClose(InventoryCloseEvent event) {
         HumanEntity player = event.getPlayer();
 
-        if (transition.containsKey(player.getUniqueId())) {
-            return;
-        }
+        if (transition.containsKey(player.getUniqueId())) return;
 
         Session session = open.remove(player.getUniqueId());
         if (session != null) {
             session.scene().close((Player) player);
         }
+    }
+
+    @EventHandler
+    public void onInventoryMove(InventoryMoveItemEvent event) {
+        plugin.getLogger().info("Moved item");
+    }
+
+    @EventHandler
+    public void onInventoryInteract(InventoryInteractEvent event) {
+        plugin.getLogger().info("Inventory interaction");
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent event) {
+        Inventory clickedInventory = event.getClickedInventory();
+        if (clickedInventory == null || clickedInventory.getType() == InventoryType.PLAYER) return;
+        // TODO: This might be a bad idea since it does not prevent moving items into the inventory
+        if(event.getView().getTopInventory() != event.getClickedInventory()) return;
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        Session session = open.get(player.getUniqueId());
+        if (session == null) return;
+        session.scene().click(event);
+        plugin.getLogger().info("Inventory click");
     }
 
     @EventHandler
@@ -66,7 +91,7 @@ public class SceneServiceImpl implements Listener, SceneService {
         Inventory inventory = plugin.getServer().createInventory(null, scene.size());
         scene.apply(inventory);
         open.put(player.getUniqueId(), new Session(inventory, scene));
-        player.openInventory(inventory);
+        player.openInventory(inventory).setTitle(scene.title());
     }
 
     private record Session(Inventory inventory, Scene scene) {

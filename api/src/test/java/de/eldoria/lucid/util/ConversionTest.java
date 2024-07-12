@@ -1,6 +1,6 @@
 package de.eldoria.lucid.util;
 
-import de.eldoria.lucid.container.Position;
+import de.eldoria.lucid.layer.Position;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
