@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     compileOnly(libs.paper.latest)
+    testImplementation(libs.paper.latest)
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }

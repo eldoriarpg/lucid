@@ -1,10 +1,9 @@
 package de.eldoria.lucid.layer;
 
+import de.eldoria.lucid.events.LayerClickEvent;
 import de.eldoria.lucid.layer.anchor.Anchor;
 import de.eldoria.lucid.layer.impl.misc.NullLayer;
-import de.eldoria.lucid.scene.Scene;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import de.eldoria.lucid.scene.SceneRegistry;
 import org.bukkit.inventory.ItemStack;
 
 public interface Layer extends FormHolder {
@@ -12,6 +11,12 @@ public interface Layer extends FormHolder {
      * A dummy layer that simply returns nothing.
      */
     Layer EMPTY = new NullLayer();
+
+    /**
+     * A registry where scenes in which this layer is contained can register.
+     * @return the scene registry
+     */
+    SceneRegistry registry();
 
     /**
      * The anchor position defining where in the layer the {@link #position()} is located.
@@ -46,18 +51,19 @@ public interface Layer extends FormHolder {
      * @param position the position that is requested. The position is the local position inside the layer and might <b>not</b> be the inventory position.
      * @return item stack instance. That instance might be a clone of an existing instance.
      */
-    ItemStack display(Position position);
+    ItemStack getDisplay(Position position);
 
     /**
      * Converts a local position inside the outer form into a position of this layer
      *
-     * @param outerForm form of the passed local position
-     * @param position  the local position inside the outer form
+     * @param inner    form of the passed local position
+     * @param position the local position inside the outer form
      * @return new position inside this layer.
      */
-    default Position toLayerPosition(Formed outerForm, Position position) {
-        return null;
+    default Position toLayerPosition(Layer inner, Position position) {
+        Area area = this.area(inner);
+        return position.minus(area.min());
     }
 
-    void click(Scene scene, Player player, InventoryClickEvent event);
+    void click(LayerClickEvent event);
 }

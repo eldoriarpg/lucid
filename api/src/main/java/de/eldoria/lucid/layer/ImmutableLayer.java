@@ -1,8 +1,6 @@
 package de.eldoria.lucid.layer;
 
-import de.eldoria.lucid.scene.Scene;
-import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import de.eldoria.lucid.events.LayerClickEvent;
 
 public interface ImmutableLayer extends Layer {
     /**
@@ -14,7 +12,7 @@ public interface ImmutableLayer extends Layer {
         return true;
     }
 
-    default void click(Scene scene, Player player, InventoryClickEvent event){
-        if (immutable()) event.setCancelled(true);
+    default void click(LayerClickEvent event){
+        if (immutable()) event.event().setCancelled(true);
     }
 }

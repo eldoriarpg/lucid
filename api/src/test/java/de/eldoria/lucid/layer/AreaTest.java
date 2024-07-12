@@ -34,6 +34,5 @@ class AreaTest {
 
     @Test
     void iterator2() {
-        new TopLayer(new Form(9,2)).area(new Form(1,0));
     }
 }

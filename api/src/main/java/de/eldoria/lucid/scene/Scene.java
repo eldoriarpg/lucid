@@ -1,32 +1,30 @@
 package de.eldoria.lucid.scene;
 
 import de.eldoria.lucid.builder.Buildable;
+import de.eldoria.lucid.events.LayerClickEvent;
 import de.eldoria.lucid.exceptions.Checks;
-import de.eldoria.lucid.layer.FormHolder;
 import de.eldoria.lucid.layer.Layer;
 import de.eldoria.lucid.layer.Position;
-import de.eldoria.lucid.layer.impl.misc.TopLayer;
 import de.eldoria.lucid.util.Conversion;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A scene that represents the view of a player.
  * <p>
  * One scene is equal to one gui, which may change during time or transition to another scene.
  */
-public class Scene implements FormHolder {
-    private final Layer topLayer;
-    private final Map<Position, Layer> layers;
+public class Scene {
+    private final LayerCatalog catalog;
     private final String title;
+    private Inventory inventory;
 
-    private Scene(Layer layer, Map<Position, Layer> layers, String title) {
-        this.topLayer = layer;
-        this.layers = layers;
+    private Scene(LayerCatalog catalog, String title) {
+        this.catalog = catalog;
         this.title = title;
     }
 
@@ -46,34 +44,68 @@ public class Scene implements FormHolder {
         //TODO
     }
 
+    private void calculate() {
+        catalog.calculate(this);
+    }
+
     public void apply(Inventory inventory) {
-        for (int slot = 0; slot < topLayer.size(); slot++) {
-            Position position = Conversion.chestSlotToPosition(slot);
-            inventory.setItem(slot, layers.getOrDefault(position, Layer.EMPTY).display(position));
+        if (this.inventory == null) this.inventory = inventory;
+        for (int slot = 0; slot < catalog.topLayer().size(); slot++) {
+            refreshPosition(slot);
         }
     }
 
-    @Override
-    public Form form() {
-        return topLayer.form();
+    private void refreshPosition(int slot) {
+        var position = Conversion.chestSlotToPosition(slot);
+        Layer layer = catalog.layerAtPosition(position);
+        inventory.setItem(slot, layer.getDisplay(catalog.toLayerPosition(layer, position)));
     }
 
-    public void click(InventoryClickEvent event) {
+    public void click(Player player, InventoryClickEvent event) {
         Position position = Conversion.chestSlotToPosition(event.getSlot());
-        layers.get(position).click(this, (Player) event.getWhoClicked(), event);
+        Layer layer = catalog.layerAtPosition(position);
+        LayerClickEvent clickEvent = new LayerClickEvent(player, this, event, catalog.toLayerPosition(layer, position));
+        layer.click(clickEvent);
+        if (clickEvent.isRedrawAll()) {
+            for (Scene scene : layer.registry().scenes()) {
+                scene.redrawAll();
+            }
+        } else {
+            for (Layer redraw : clickEvent.redraw()) {
+                for (Scene scene : redraw.registry().scenes()) {
+                    scene.redraw(redraw);
+                }
+            }
+        }
+    }
+
+    private void redrawAll() {
+        for (Layer layer : catalog.layers()) {
+            redraw(layer);
+        }
+    }
+
+    private void redraw(Layer layer) {
+        for (Position position : catalog.layerPositions(layer)) {
+            inventory.setItem(position.toChestSlot(), layer.getDisplay(catalog.toLayerPosition(layer, position)));
+        }
     }
 
     public String title() {
         return title;
     }
 
+    public int size() {
+        return catalog.size();
+    }
+
     public static class Builder {
-        private final Layer form;
-        private final Map<Position, Layer> layers = new HashMap<>();
+        private final Form form;
+        private final List<Layer> layerList = new LinkedList<>();
         private String title;
 
         private Builder(Form form) {
-            this.form = new TopLayer(form);
+            this.form = form;
         }
 
         public static Builder create(int lines) {
@@ -90,14 +122,7 @@ public class Scene implements FormHolder {
         }
 
         public Builder add(Layer layer) {
-            for (Position position : form.area(layer)) {
-                layers.compute(position, (p, l) -> {
-                    if (l == null) return layer;
-                    // If the layers have the same priority, the later one takes precedence as if they were stacked.
-                    if (l.priority() == layer.priority()) return layer;
-                    return l.priority() < layer.priority() ? l : layer;
-                });
-            }
+            layerList.add(layer);
             return this;
         }
 
@@ -107,7 +132,9 @@ public class Scene implements FormHolder {
         }
 
         public Scene build() {
-            return new Scene(form, layers, title);
+            Scene scene = new Scene(new LayerCatalog(form, layerList), title);
+            scene.calculate();
+            return scene;
         }
     }
 }

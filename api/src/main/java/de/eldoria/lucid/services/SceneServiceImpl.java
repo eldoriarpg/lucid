@@ -60,11 +60,11 @@ public class SceneServiceImpl implements Listener, SceneService {
         Inventory clickedInventory = event.getClickedInventory();
         if (clickedInventory == null || clickedInventory.getType() == InventoryType.PLAYER) return;
         // TODO: This might be a bad idea since it does not prevent moving items into the inventory
-        if(event.getView().getTopInventory() != event.getClickedInventory()) return;
+        if (event.getView().getTopInventory() != event.getClickedInventory()) return;
         if (!(event.getWhoClicked() instanceof Player player)) return;
         Session session = open.get(player.getUniqueId());
         if (session == null) return;
-        session.scene().click(event);
+        session.scene().click(player, event);
         plugin.getLogger().info("Inventory click");
     }
 
@@ -77,6 +77,14 @@ public class SceneServiceImpl implements Listener, SceneService {
 
     @Override
     public void transition(Player player, Scene scene) {
+        Session session = open.get(player.getUniqueId());
+        if (session != null) {
+            if (session.inventory().getSize() == scene.size()) {
+                open.put(player.getUniqueId(), new Session(session.inventory(), scene));
+                scene.apply(session.inventory());
+                return;
+            }
+        }
         transition.put(player.getUniqueId(), scene);
         player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
         openDelayed(player, scene);

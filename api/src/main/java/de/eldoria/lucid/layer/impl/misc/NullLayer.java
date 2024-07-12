@@ -4,10 +4,15 @@ import de.eldoria.lucid.layer.ImmutableLayer;
 import de.eldoria.lucid.layer.Layer;
 import de.eldoria.lucid.layer.Position;
 import de.eldoria.lucid.layer.anchor.Anchor;
+import de.eldoria.lucid.layer.base.AbstractLayer;
 import de.eldoria.lucid.scene.Form;
 import org.bukkit.inventory.ItemStack;
 
-public class NullLayer implements ImmutableLayer {
+public class NullLayer extends AbstractLayer implements ImmutableLayer {
+    public NullLayer() {
+        super(null, null, null, Integer.MAX_VALUE);
+    }
+
     @Override
     public boolean immutable() {
         return false;
@@ -29,7 +34,7 @@ public class NullLayer implements ImmutableLayer {
     }
 
     @Override
-    public ItemStack display(Position position) {
+    public ItemStack getDisplay(Position position) {
         return null;
     }
 
