@@ -7,16 +7,13 @@ version = "1.0.0"
 
 allprojects {
     apply<JavaPlugin>()
-}
-repositories {
-    mavenCentral()
+
+    repositories {
+        mavenCentral()
+        repositories {
+            maven("https://eldonexus.de/repository/maven-public/")
+            maven("https://eldonexus.de/repository/maven-proxies/")
+        }
+    }
 }
 
-dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-}
-
-tasks.test {
-    useJUnitPlatform()
-}

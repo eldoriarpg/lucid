@@ -1,19 +1,28 @@
 plugins {
-    id("java")
-}
-
-group = "de.eldoria"
-version = "1.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
+    alias(libs.plugins.pluginyml.bukkit)
+    alias(libs.plugins.shadow)
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    compileOnly(libs.paper.latest)
+    implementation(project(":api"))
+    bukkitLibrary(libs.eldoutil.plugin)
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks {
+    shadowJar {
+        mergeServiceFiles()
+    }
+}
+
+bukkit {
+    name = "Lucid"
+    main = "de.eldoria.lucid.LucidPlugin"
+    apiVersion = "1.16"
+
+    commands{
+        register("lucid"){
+
+        }
+    }
 }
