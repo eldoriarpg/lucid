@@ -1,5 +1,6 @@
 package de.eldoria.lucid.layer;
 
+import de.eldoria.lucid.area.impl.SquaredArea;
 import de.eldoria.lucid.events.LayerClickEvent;
 import de.eldoria.lucid.layer.anchor.Anchor;
 import de.eldoria.lucid.layer.impl.misc.TopLayer;
@@ -26,7 +27,7 @@ class LayerTest {
         }
 
         @Override
-        public org.bukkit.inventory.ItemStack getDisplay(Position position) {
+        public org.bukkit.inventory.ItemStack displayAt(Position position) {
             return null;
         }
 
@@ -43,8 +44,8 @@ class LayerTest {
 
     @Test
     void area() {
-        Area area = outer.area(inner);
-        Assertions.assertEquals(new Area(Position.ONE, Position.ONE.plus(4)), area);
+        SquaredArea area = outer.area(inner);
+        Assertions.assertEquals(new SquaredArea(Position.ONE, Position.ONE.plus(4)), area);
     }
 
     @Test

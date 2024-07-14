@@ -1,6 +1,6 @@
 package de.eldoria.lucid.layer.anchor.impl;
 
-import de.eldoria.lucid.layer.Area;
+import de.eldoria.lucid.area.impl.SquaredArea;
 import de.eldoria.lucid.layer.Position;
 import de.eldoria.lucid.scene.Form;
 import org.junit.jupiter.api.Assertions;
@@ -28,8 +28,8 @@ class TopRightAnchorTest {
         0 0 0 0 0 0 0
          */
         var form = new Form(5, 5);
-        Area area = TOP_RIGHT.area(form, new Position(5, 0));
-        Assertions.assertEquals(new Area(new Position(1, 0), new Position(5, 4)), area);
+        SquaredArea area = TOP_RIGHT.area(form, new Position(5, 0));
+        Assertions.assertEquals(new SquaredArea(new Position(1, 0), new Position(5, 4)), area);
 
     }
 }

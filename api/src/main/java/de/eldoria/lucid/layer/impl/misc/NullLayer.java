@@ -34,12 +34,17 @@ public class NullLayer extends AbstractLayer implements ImmutableLayer {
     }
 
     @Override
-    public ItemStack getDisplay(Position position) {
+    public ItemStack displayAt(Position position) {
         return null;
     }
 
     @Override
     public Form form() {
         return null;
+    }
+
+    @Override
+    public Position toLayerPosition(Layer inner, Position position) {
+        return position;
     }
 }

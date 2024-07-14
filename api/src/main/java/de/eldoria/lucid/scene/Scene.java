@@ -2,6 +2,7 @@ package de.eldoria.lucid.scene;
 
 import de.eldoria.lucid.builder.Buildable;
 import de.eldoria.lucid.events.LayerClickEvent;
+import de.eldoria.lucid.events.LayerClickEventImpl;
 import de.eldoria.lucid.exceptions.Checks;
 import de.eldoria.lucid.layer.Layer;
 import de.eldoria.lucid.layer.Position;
@@ -10,8 +11,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * A scene that represents the view of a player.
@@ -22,6 +27,7 @@ public class Scene {
     private final LayerCatalog catalog;
     private final String title;
     private Inventory inventory;
+    private final Set<UUID> redraw = new HashSet<>();
 
     private Scene(LayerCatalog catalog, String title) {
         this.catalog = catalog;
@@ -36,10 +42,6 @@ public class Scene {
         return Builder.create(lines);
     }
 
-    public void transition(Scene scene) {
-        // TODO:
-    }
-
     public void close(Player player) {
         //TODO
     }
@@ -48,6 +50,12 @@ public class Scene {
         catalog.calculate(this);
     }
 
+    /**
+     * Applies this scene to an inventory and binds this inventory onto a scene.
+     * This should be only called once on a scene.
+     *
+     * @param inventory the inventory that this scene will be tied to.
+     */
     public void apply(Inventory inventory) {
         if (this.inventory == null) this.inventory = inventory;
         for (int slot = 0; slot < catalog.topLayer().size(); slot++) {
@@ -57,37 +65,60 @@ public class Scene {
 
     private void refreshPosition(int slot) {
         var position = Conversion.chestSlotToPosition(slot);
-        Layer layer = catalog.layerAtPosition(position);
-        inventory.setItem(slot, layer.getDisplay(catalog.toLayerPosition(layer, position)));
+        catalog.layerAtPosition(position)
+                .ifPresent(layer -> inventory.setItem(slot, layer.displayAt(catalog.toLayerPosition(layer, position))));
     }
 
     public void click(Player player, InventoryClickEvent event) {
         Position position = Conversion.chestSlotToPosition(event.getSlot());
-        Layer layer = catalog.layerAtPosition(position);
-        LayerClickEvent clickEvent = new LayerClickEvent(player, this, event, catalog.toLayerPosition(layer, position));
-        layer.click(clickEvent);
+        Optional<Layer> layer = catalog.layerAtPosition(position);
+        if (layer.isEmpty()) return;
+        LayerClickEvent clickEvent = new LayerClickEventImpl(player, this, event, catalog.toLayerPosition(layer.orElse(null), position));
+        layer.get().click(clickEvent);
         if (clickEvent.isRedrawAll()) {
-            for (Scene scene : layer.registry().scenes()) {
+            for (Scene scene : layer.get().registry().scenes()) {
                 scene.redrawAll();
             }
         } else {
             for (Layer redraw : clickEvent.redraw()) {
                 for (Scene scene : redraw.registry().scenes()) {
-                    scene.redraw(redraw);
+                    scene.redrawLater(redraw);
                 }
             }
         }
     }
 
-    private void redrawAll() {
+    /**
+     * Redraws all layers that are visible in this scene.
+     */
+    public void redrawAll() {
         for (Layer layer : catalog.layers()) {
-            redraw(layer);
+            redrawLater(layer);
         }
     }
 
-    private void redraw(Layer layer) {
-        for (Position position : catalog.layerPositions(layer)) {
-            inventory.setItem(position.toChestSlot(), layer.getDisplay(catalog.toLayerPosition(layer, position)));
+    /**
+     * Redraws this layer, where it is visible in this scene
+     *
+     * @param layer redraws this layer inside this scene.
+     */
+    public void redrawLater(UUID layer) {
+        redraw.add(layer);
+    }
+
+    /**
+     * Redraws this layer, where it is visible in this scene
+     *
+     * @param layer redraws this layer inside this scene.
+     */
+    public void redrawLater(Layer layer) {
+        redrawLater(layer.uid());
+    }
+
+    public void redraw(UUID uid) {
+        Layer layer = catalog.byUID(uid);
+        for (Position position : catalog.layerPositions(uid)) {
+            inventory.setItem(position.toChestSlot(), layer.displayAt(catalog.toLayerPosition(layer, position)));
         }
     }
 
@@ -97,6 +128,15 @@ public class Scene {
 
     public int size() {
         return catalog.size();
+    }
+
+    public void tick() {
+        for (UUID layer : redraw) {
+            redraw(layer);
+        }
+        redraw.clear();
+        // Listeners are running first and after that the schedulers.
+        // This will delay every redraw by one tick essentially.
     }
 
     public static class Builder {

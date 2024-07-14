@@ -5,12 +5,13 @@ import de.eldoria.lucid.layer.Position;
 import de.eldoria.lucid.layer.anchor.Anchor;
 import de.eldoria.lucid.layer.base.AbstractLayer;
 import de.eldoria.lucid.layer.builder.BasicLayerBuilder;
+import de.eldoria.lucid.layer.impl.StaticDisplay;
 import de.eldoria.lucid.scene.Form;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class StaticDecoration extends AbstractLayer implements ImmutableLayer {
+public class StaticDecoration extends AbstractLayer implements ImmutableLayer, StaticDisplay {
     private ItemStack item;
 
     protected StaticDecoration(Form form, Position position, Anchor anchor, int priority, ItemStack item) {
@@ -32,12 +33,15 @@ public class StaticDecoration extends AbstractLayer implements ImmutableLayer {
         return builder(form, itemStack);
     }
 
-    public ItemStack getDisplay(Position position) {
-        return item;
+    @Override
+    public void updateDisplay(ItemStack item) {
+        this.item = item;
     }
 
-    public void item(ItemStack item) {
-        this.item = item;
+
+    @Override
+    public ItemStack displayAt(Position position) {
+        return item;
     }
 
     public static class Builder extends BasicLayerBuilder<Builder, StaticDecoration> {

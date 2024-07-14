@@ -1,6 +1,6 @@
 package de.eldoria.lucid.layer.anchor.impl;
 
-import de.eldoria.lucid.layer.Area;
+import de.eldoria.lucid.area.impl.SquaredArea;
 import de.eldoria.lucid.layer.Formed;
 import de.eldoria.lucid.layer.Position;
 import de.eldoria.lucid.layer.anchor.Anchor;
@@ -14,11 +14,11 @@ public class CenterAnchor implements Anchor {
     }
 
     @Override
-    public Area area(Formed inner, Position position) {
+    public SquaredArea area(Formed inner, Position position) {
         Checks.assertNotEvenForm(inner);
         var hHalf = inner.horizontal() / 2;
         var vHalf = inner.vertical() / 2;
-        return new Area(
+        return new SquaredArea(
                 new Position(position.x() - hHalf, position.y() - vHalf),
                 new Position(position.x() + hHalf, position.y() + vHalf)
         );

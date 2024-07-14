@@ -1,6 +1,6 @@
 package de.eldoria.lucid.layer.anchor;
 
-import de.eldoria.lucid.layer.Area;
+import de.eldoria.lucid.area.impl.SquaredArea;
 import de.eldoria.lucid.layer.Formed;
 import de.eldoria.lucid.layer.Position;
 import de.eldoria.lucid.layer.anchor.impl.BottomLeftAnchor;
@@ -97,11 +97,11 @@ public interface Anchor {
     Position position(Formed form);
 
     /**
-     * Returns the {@link Area} that the inner form is taking up inside the {@link Formed} entity.
+     * Returns the {@link SquaredArea} that the inner form is taking up inside the {@link Formed} entity.
      *
      * @param inner    the formed entity
      * @param position the position of {@code inner} inside the current formed entity.
      * @return are that the entity takes up
      */
-    Area area(Formed inner, Position position);
+    SquaredArea area(Formed inner, Position position);
 }

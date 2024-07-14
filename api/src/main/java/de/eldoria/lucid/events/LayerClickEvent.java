@@ -6,54 +6,22 @@ import de.eldoria.lucid.scene.Scene;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
-public final class LayerClickEvent {
-    private final Player player;
-    private final Scene scene;
-    private final InventoryClickEvent event;
-    private final Position position;
-    private final Set<Layer> redraw = new HashSet<>();
-    private boolean redrawAll = false;
+public interface LayerClickEvent {
+    void redraw(Layer layer);
 
-    public LayerClickEvent(Player player, Scene scene, InventoryClickEvent event, Position position) {
-        this.player = player;
-        this.scene = scene;
-        this.event = event;
-        this.position = position;
-    }
+    void redrawAll();
 
-    public void redraw(Layer layer) {
-        redraw.add(layer);
-    }
+    Set<Layer> redraw();
 
-    public void redrawAll() {
-        redrawAll = true;
-    }
+    boolean isRedrawAll();
 
-    public Set<Layer> redraw() {
-        return Collections.unmodifiableSet(redraw);
-    }
+    Player player();
 
-    public boolean isRedrawAll() {
-        return redrawAll;
-    }
+    Scene scene();
 
-    public Player player() {
-        return player;
-    }
+    InventoryClickEvent event();
 
-    public Scene scene() {
-        return scene;
-    }
-
-    public InventoryClickEvent event() {
-        return event;
-    }
-
-    public Position position() {
-        return position;
-    }
+    Position position();
 }

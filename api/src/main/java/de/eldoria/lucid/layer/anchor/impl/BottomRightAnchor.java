@@ -1,6 +1,6 @@
 package de.eldoria.lucid.layer.anchor.impl;
 
-import de.eldoria.lucid.layer.Area;
+import de.eldoria.lucid.area.impl.SquaredArea;
 import de.eldoria.lucid.layer.Formed;
 import de.eldoria.lucid.layer.Position;
 import de.eldoria.lucid.layer.anchor.Anchor;
@@ -13,8 +13,8 @@ public class BottomRightAnchor implements Anchor {
     }
 
     @Override
-    public Area area(Formed inner, Position position) {
-        return new Area(
+    public SquaredArea area(Formed inner, Position position) {
+        return new SquaredArea(
                 new Position(position.x() - inner.horizontal() + 1, position.y() - inner.vertical() + 1),
                 new Position(position.x(), position.y())
         );

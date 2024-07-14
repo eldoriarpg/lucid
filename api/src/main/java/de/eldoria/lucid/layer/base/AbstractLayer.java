@@ -6,8 +6,11 @@ import de.eldoria.lucid.layer.anchor.Anchor;
 import de.eldoria.lucid.scene.Form;
 import de.eldoria.lucid.scene.SceneRegistry;
 
+import java.util.UUID;
+
 public abstract class AbstractLayer implements Layer {
 
+    private final UUID uid = UUID.randomUUID();
     private final Form form;
     private final Position position;
     private final Anchor anchor;
@@ -44,5 +47,23 @@ public abstract class AbstractLayer implements Layer {
     @Override
     public SceneRegistry registry() {
         return registry;
+    }
+
+    @Override
+    public UUID uid() {
+        return uid;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        Layer that = (Layer) o;
+        return uid.equals(that.uid());
+    }
+
+    @Override
+    public int hashCode() {
+        return uid.hashCode();
     }
 }

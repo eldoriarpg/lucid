@@ -1,18 +1,17 @@
 package de.eldoria.lucid.layer;
 
-import de.eldoria.lucid.layer.impl.misc.TopLayer;
-import de.eldoria.lucid.scene.Form;
+import de.eldoria.lucid.area.impl.SquaredArea;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-class AreaTest {
+class SquaredAreaTest {
 
     @Test
     void iterator() {
-        Area area = new Area(new Position(0, 0), new Position(2, 2));
+        SquaredArea area = new SquaredArea(new Position(0, 0), new Position(2, 2));
         List<Position> positions = new ArrayList<>();
         for (Position position : area) {
             positions.add(position);

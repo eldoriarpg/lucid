@@ -5,20 +5,23 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class SceneServiceImpl implements Listener, SceneService {
+public class SceneServiceImpl implements Listener, SceneService, Runnable {
     private final Plugin plugin;
     /**
      * The open scene of the player
@@ -31,6 +34,7 @@ public class SceneServiceImpl implements Listener, SceneService {
 
     SceneServiceImpl(Plugin plugin) {
         this.plugin = plugin;
+        plugin.getServer().getScheduler().runTaskTimer(plugin, this, 1, 1);
     }
 
     @EventHandler
@@ -56,11 +60,35 @@ public class SceneServiceImpl implements Listener, SceneService {
     }
 
     @EventHandler
+    public void onInventoryDrag(InventoryDragEvent event) {
+        if (event.getView().getBottomInventory() == event.getInventory()) {
+            // Let the player do what they want in their inv
+            return;
+        }
+        if (open.containsKey(event.getWhoClicked().getUniqueId())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
         Inventory clickedInventory = event.getClickedInventory();
-        if (clickedInventory == null || clickedInventory.getType() == InventoryType.PLAYER) return;
-        // TODO: This might be a bad idea since it does not prevent moving items into the inventory
-        if (event.getView().getTopInventory() != event.getClickedInventory()) return;
+        if (clickedInventory == null) return;
+
+        if (clickedInventory.getType() != InventoryType.PLAYER && clickedInventory.getType() != InventoryType.CHEST) return;
+
+        // Handle the players personal inventory
+        if (event.getView().getBottomInventory() == event.getClickedInventory()) {
+            // check whether the player wants to move an item to our inventory
+            if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
+                // Let's not support this for now.
+                // TODO: Implement moving items with shift into the found container
+                event.setCancelled(true);
+            }
+            return;
+        }
+
+        // This should prob never happen
         if (!(event.getWhoClicked() instanceof Player player)) return;
         Session session = open.get(player.getUniqueId());
         if (session == null) return;
@@ -99,7 +127,17 @@ public class SceneServiceImpl implements Listener, SceneService {
         Inventory inventory = plugin.getServer().createInventory(null, scene.size());
         scene.apply(inventory);
         open.put(player.getUniqueId(), new Session(inventory, scene));
-        player.openInventory(inventory).setTitle(scene.title());
+        InventoryView view = player.openInventory(inventory);
+        if (scene.title() != null) {
+            view.setTitle(scene.title());
+        }
+    }
+
+    @Override
+    public void run() {
+        for (Session value : open.values()) {
+            value.scene().tick();
+        }
     }
 
     private record Session(Inventory inventory, Scene scene) {

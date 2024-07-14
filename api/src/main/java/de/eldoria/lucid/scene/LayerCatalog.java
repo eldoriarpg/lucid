@@ -10,12 +10,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
 public class LayerCatalog implements FormHolder {
     private final Layer topLayer;
     private final List<Layer> layers;
     private final Map<Position, Layer> positionLayerList = new HashMap<>();
-    private final Map<Layer, List<Position>> layerPositionMap = new HashMap<>();
+    private final Map<UUID, Layer> ids = new HashMap<>();
+    private final Map<UUID, List<Position>> layerPositionMap = new HashMap<>();
 
     public LayerCatalog(Form formed, List<Layer> layers) {
         topLayer = new TopLayer(formed);
@@ -30,12 +34,13 @@ public class LayerCatalog implements FormHolder {
         return topLayer.toLayerPosition(layer, position);
     }
 
-    public Layer layerAtPosition(Position position) {
-        return positionLayerList.getOrDefault(position, Layer.EMPTY);
+    public Optional<Layer> layerAtPosition(Position position) {
+        return Optional.ofNullable(positionLayerList.get(position));
     }
 
     public void calculate(Scene scene) {
         for (Layer layer : layers) {
+            ids.put(layer.uid(), layer);
             layer.registry().register(scene);
             for (Position position : topLayer.area(layer)) {
                 positionLayerList.compute(position, (p, l) -> {
@@ -47,7 +52,7 @@ public class LayerCatalog implements FormHolder {
             }
         }
         for (var entry : positionLayerList.entrySet()) {
-            layerPositionMap.computeIfAbsent(entry.getValue(), k -> new ArrayList<>()).add(entry.getKey());
+            layerPositionMap.computeIfAbsent(entry.getValue().uid(), k -> new ArrayList<>()).add(entry.getKey());
         }
     }
 
@@ -56,11 +61,17 @@ public class LayerCatalog implements FormHolder {
         return topLayer.form();
     }
 
-    public List<Position> layerPositions(Layer layer) {
-        return layerPositionMap.get(layer);
+    public List<Position> layerPositions(UUID layer) {
+        List<Position> positions = layerPositionMap.get(layer);
+        Objects.requireNonNull(positions, "Layer with uid " + layer + " is not present.");
+        return positions;
     }
 
     public List<Layer> layers() {
         return Collections.unmodifiableList(layers);
+    }
+
+    public Layer byUID(UUID layer) {
+        return ids.get(layer);
     }
 }

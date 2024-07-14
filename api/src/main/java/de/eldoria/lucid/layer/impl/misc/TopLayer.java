@@ -14,7 +14,7 @@ public class TopLayer extends AbstractLayer implements ImmutableLayer {
     }
 
     @Override
-    public ItemStack getDisplay(Position position) {
+    public ItemStack displayAt(Position position) {
         return null;
     }
 }

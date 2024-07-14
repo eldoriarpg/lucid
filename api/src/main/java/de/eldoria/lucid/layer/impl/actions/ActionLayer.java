@@ -26,7 +26,7 @@ public class ActionLayer extends AbstractLayer {
     }
 
     @Override
-    public ItemStack getDisplay(Position position) {
+    public ItemStack displayAt(Position position) {
         return positionalAction(position).map(Action::getDisplay).orElse(null);
     }
 
