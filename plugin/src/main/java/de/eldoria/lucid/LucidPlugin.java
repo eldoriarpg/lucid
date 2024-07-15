@@ -3,7 +3,6 @@ package de.eldoria.lucid;
 import de.eldoria.eldoutilities.messages.MessageSender;
 import de.eldoria.eldoutilities.plugin.EldoPlugin;
 import de.eldoria.lucid.commands.BaseCommand;
-import de.eldoria.lucid.services.SceneService;
 
 import java.util.logging.Level;
 

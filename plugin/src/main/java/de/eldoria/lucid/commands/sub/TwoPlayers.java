@@ -33,11 +33,11 @@ public void onCommand(@NotNull Player player, @NotNull String alias, @NotNull Ar
     var left = new Position(1, 1);
     var right = new Position(5, 1);
 
-    Layer firstContainer = ItemStackContainerLayer.builder(new Form(3, 4))
+    ItemStackContainerLayer firstContainer = ItemStackContainerLayer.builder(new Form(3, 4))
             .position(left)
             .build();
 
-    Layer secondContainer = ItemStackContainerLayer.builder(new Form(3, 4))
+    ItemStackContainerLayer secondContainer = ItemStackContainerLayer.builder(new Form(3, 4))
             .position(left)
             .build();
 
@@ -46,6 +46,7 @@ public void onCommand(@NotNull Player player, @NotNull String alias, @NotNull Ar
             .add(StaticDecoration.builder(new Form(9, 6), Material.BLUE_STAINED_GLASS_PANE).build())
             .add(firstContainer)
             .add(secondContainer.relocate(right).makeImmutable())
+            .inputSink(firstContainer)
             .build();
 
     var second = Scene.builder(6)
@@ -53,6 +54,7 @@ public void onCommand(@NotNull Player player, @NotNull String alias, @NotNull Ar
             .add(StaticDecoration.builder(new Form(9, 6), Material.RED_STAINED_GLASS_PANE).build())
             .add(secondContainer)
             .add(firstContainer.relocate(right).makeImmutable())
+            .inputSink(secondContainer)
             .build();
 
     Lucid.open(player, first);

@@ -15,13 +15,14 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class SceneServiceImpl implements Listener, SceneService, Runnable {
+public class LucidServiceImpl implements Listener, LucidService, Runnable {
     private final Plugin plugin;
     /**
      * The open scene of the player
@@ -32,7 +33,7 @@ public class SceneServiceImpl implements Listener, SceneService, Runnable {
      */
     private final Map<UUID, Scene> transition = new HashMap<>();
 
-    SceneServiceImpl(Plugin plugin) {
+    LucidServiceImpl(Plugin plugin) {
         this.plugin = plugin;
         plugin.getServer().getScheduler().runTaskTimer(plugin, this, 1, 1);
     }
@@ -77,10 +78,17 @@ public class SceneServiceImpl implements Listener, SceneService, Runnable {
 
         if (clickedInventory.getType() != InventoryType.PLAYER && clickedInventory.getType() != InventoryType.CHEST) return;
 
+        if (!(event.getWhoClicked() instanceof Player player)) return;
+        Session session = open.get(player.getUniqueId());
+        if (session == null) return;
+
         // Handle the players personal inventory
         if (event.getView().getBottomInventory() == event.getClickedInventory()) {
+            ItemStack currentItem = event.getCurrentItem();
             // check whether the player wants to move an item to our inventory
-            if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT) {
+            if (event.getClick() == ClickType.SHIFT_LEFT || event.getClick() == ClickType.SHIFT_RIGHT && currentItem != null) {
+                ItemStack result = session.scene().putItem(currentItem.clone());
+                event.setCurrentItem(result);
                 // Let's not support this for now.
                 // TODO: Implement moving items with shift into the found container
                 event.setCancelled(true);
@@ -89,9 +97,6 @@ public class SceneServiceImpl implements Listener, SceneService, Runnable {
         }
 
         // This should prob never happen
-        if (!(event.getWhoClicked() instanceof Player player)) return;
-        Session session = open.get(player.getUniqueId());
-        if (session == null) return;
         session.scene().click(player, event);
         plugin.getLogger().info("Inventory click");
     }

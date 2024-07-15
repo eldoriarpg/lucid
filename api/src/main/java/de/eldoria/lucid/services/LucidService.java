@@ -4,9 +4,9 @@ import de.eldoria.lucid.scene.Scene;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public interface SceneService {
-    static SceneService create(Plugin plugin) {
-        SceneServiceImpl service = new SceneServiceImpl(plugin);
+public interface LucidService {
+    static LucidService create(Plugin plugin) {
+        LucidServiceImpl service = new LucidServiceImpl(plugin);
         plugin.getServer().getPluginManager().registerEvents(service, plugin);
         return service;
     }

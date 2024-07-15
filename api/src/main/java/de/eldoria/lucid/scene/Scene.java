@@ -6,10 +6,13 @@ import de.eldoria.lucid.events.LayerClickEventImpl;
 import de.eldoria.lucid.exceptions.Checks;
 import de.eldoria.lucid.layer.Layer;
 import de.eldoria.lucid.layer.Position;
+import de.eldoria.lucid.scene.components.InputSink;
 import de.eldoria.lucid.util.Conversion;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -23,15 +26,19 @@ import java.util.UUID;
  * <p>
  * One scene is equal to one gui, which may change during time or transition to another scene.
  */
-public class Scene {
+public class Scene implements InputSink {
     private final LayerCatalog catalog;
+    @Nullable
     private final String title;
     private Inventory inventory;
     private final Set<UUID> redraw = new HashSet<>();
+    @Nullable
+    private final InputSink inputSink;
 
-    private Scene(LayerCatalog catalog, String title) {
+    private Scene(LayerCatalog catalog, String title, InputSink inputSink) {
         this.catalog = catalog;
         this.title = title;
+        this.inputSink = inputSink;
     }
 
     public static Builder builder(int lines) {
@@ -139,10 +146,17 @@ public class Scene {
         // This will delay every redraw by one tick essentially.
     }
 
+    @Override
+    public ItemStack putItem(ItemStack item) {
+        if (inputSink == null) return item;
+        return inputSink.putItem(item);
+    }
+
     public static class Builder {
         private final Form form;
         private final List<Layer> layerList = new LinkedList<>();
         private String title;
+        private InputSink inputSink;
 
         private Builder(Form form) {
             this.form = form;
@@ -171,8 +185,21 @@ public class Scene {
             return this;
         }
 
+        /**
+         * Defines the input sink of this scene.
+         * The input sink is used when items are moved into the inventory with {@link org.bukkit.event.inventory.ClickType#SHIFT_RIGHT} or {@link org.bukkit.event.inventory.ClickType#SHIFT_LEFT}
+         * There can be only one input sink per scene.
+         *
+         * @param inputSink the input sink
+         * @return this builder
+         */
+        public Builder inputSink(InputSink inputSink) {
+            this.inputSink = inputSink;
+            return this;
+        }
+
         public Scene build() {
-            Scene scene = new Scene(new LayerCatalog(form, layerList), title);
+            Scene scene = new Scene(new LayerCatalog(form, layerList), title, inputSink);
             scene.calculate();
             return scene;
         }
