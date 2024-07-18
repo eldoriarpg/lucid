@@ -76,7 +76,8 @@ public class LucidServiceImpl implements Listener, LucidService, Runnable {
         Inventory clickedInventory = event.getClickedInventory();
         if (clickedInventory == null) return;
 
-        if (clickedInventory.getType() != InventoryType.PLAYER && clickedInventory.getType() != InventoryType.CHEST) return;
+        if (clickedInventory.getType() != InventoryType.PLAYER && clickedInventory.getType() != InventoryType.CHEST)
+            return;
 
         if (!(event.getWhoClicked() instanceof Player player)) return;
         Session session = open.get(player.getUniqueId());
@@ -129,13 +130,17 @@ public class LucidServiceImpl implements Listener, LucidService, Runnable {
 
     @Override
     public void open(Player player, Scene scene) {
-        Inventory inventory = plugin.getServer().createInventory(null, scene.size());
+        Inventory inventory;
+        if (scene.titleComponent() != null) {
+            inventory = plugin.getServer().createInventory(null, scene.size(), scene.titleComponent());
+        } else if (scene.title() != null) {
+            inventory = plugin.getServer().createInventory(null, scene.size(), scene.title());
+        } else {
+            inventory = plugin.getServer().createInventory(null, scene.size());
+        }
         scene.apply(inventory);
         open.put(player.getUniqueId(), new Session(inventory, scene));
         InventoryView view = player.openInventory(inventory);
-        if (scene.title() != null) {
-            view.setTitle(scene.title());
-        }
     }
 
     @Override

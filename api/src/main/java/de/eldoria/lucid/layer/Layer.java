@@ -8,7 +8,6 @@ import de.eldoria.lucid.layer.impl.delegates.RelocationLayer;
 import de.eldoria.lucid.layer.impl.misc.NullLayer;
 import de.eldoria.lucid.scene.Scene;
 import de.eldoria.lucid.scene.SceneRegistry;
-import net.kyori.adventure.text.BlockNBTComponent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
@@ -106,11 +105,16 @@ public interface Layer extends FormHolder {
         }
     }
 
-    default Layer relocate(Position position){
+    default Layer relocate(Position position) {
         return RelocationLayer.wrap(this, position);
     }
 
-    default Layer makeImmutable(){
+    default Layer makeImmutable() {
         return ImmutabilityLayer.wrap(this);
     }
+
+    /**
+     * Called on every server tick
+     */
+    void tick();
 }

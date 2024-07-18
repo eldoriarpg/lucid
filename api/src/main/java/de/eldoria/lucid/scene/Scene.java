@@ -8,6 +8,8 @@ import de.eldoria.lucid.layer.Layer;
 import de.eldoria.lucid.layer.Position;
 import de.eldoria.lucid.scene.components.InputSink;
 import de.eldoria.lucid.util.Conversion;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
@@ -34,11 +36,13 @@ public class Scene implements InputSink {
     private final Set<UUID> redraw = new HashSet<>();
     @Nullable
     private final InputSink inputSink;
+    private final Component titleComponent;
 
-    private Scene(LayerCatalog catalog, String title, InputSink inputSink) {
+    private Scene(LayerCatalog catalog, String title, InputSink inputSink, Component titleComponent) {
         this.catalog = catalog;
         this.title = title;
         this.inputSink = inputSink;
+        this.titleComponent = titleComponent;
     }
 
     public static Builder builder(int lines) {
@@ -129,6 +133,18 @@ public class Scene implements InputSink {
         }
     }
 
+    public void tick() {
+        for (UUID layer : redraw) {
+            redraw(layer);
+        }
+        for (Layer layer : catalog.layers()) {
+            layer.tick();
+        }
+        redraw.clear();
+        // Listeners are running first and after that the schedulers.
+        // This will delay every redraw by one tick essentially.
+    }
+
     public String title() {
         return title;
     }
@@ -137,25 +153,21 @@ public class Scene implements InputSink {
         return catalog.size();
     }
 
-    public void tick() {
-        for (UUID layer : redraw) {
-            redraw(layer);
-        }
-        redraw.clear();
-        // Listeners are running first and after that the schedulers.
-        // This will delay every redraw by one tick essentially.
-    }
-
     @Override
     public ItemStack putItem(ItemStack item) {
         if (inputSink == null) return item;
         return inputSink.putItem(item);
     }
 
+    public Component titleComponent() {
+        return titleComponent;
+    }
+
     public static class Builder {
         private final Form form;
         private final List<Layer> layerList = new LinkedList<>();
         private String title;
+        private Component titleComponent;
         private InputSink inputSink;
 
         private Builder(Form form) {
@@ -184,6 +196,10 @@ public class Scene implements InputSink {
             this.title = title;
             return this;
         }
+        public Builder title(Component title) {
+            this.titleComponent = title;
+            return this;
+        }
 
         /**
          * Defines the input sink of this scene.
@@ -199,7 +215,7 @@ public class Scene implements InputSink {
         }
 
         public Scene build() {
-            Scene scene = new Scene(new LayerCatalog(form, layerList), title, inputSink);
+            Scene scene = new Scene(new LayerCatalog(form, layerList), title, inputSink, titleComponent);
             scene.calculate();
             return scene;
         }
